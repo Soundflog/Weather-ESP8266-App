@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Data</title>
+    <!-- Подключение библиотеки Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .chart-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+<h1>Weather Data</h1>
+<div class="grid-container">
+    <div class="chart-container">
+        <h2>Temperature</h2>
+        <canvas id="temperatureChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <h2>Humidity</h2>
+        <canvas id="humidityChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <h2>Light</h2>
+        <canvas id="lightChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <h2>Pressure</h2>
+        <canvas id="pressureChart"></canvas>
+    </div>
+</div>
+
+
+<!-- Скрипт для загрузки данных и создания графиков -->
+<script>
+    // Функция для загрузки данных с сервера
+    async function fetchData() {
+        try {
+            const response = await fetch('http://localhost:3000/getWeather');
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error(error);
+            document.getElementById('error-message').style.display = 'block';
+            throw error;
+        }
+    }
+
+    // Функция для создания графиков
+    async function createCharts() {
+        try {
+            const data = await fetchData();
+
+            const temperatureData = {
+                labels: data.map(entry => entry.date),
+                datasets: [{
+                    label: 'Temperature (°C)',
+                    data: data.map(entry => entry.temperature),
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const humidityData = {
+                labels: data.map(entry => entry.date),
+                datasets: [{
+                    label: 'Humidity (%)',
+                    data: data.map(entry => entry.humidity),
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const lightData = {
+                labels: data.map(entry => entry.date),
+                datasets: [{
+                    label: 'Light (lux)',
+                    data: data.map(entry => entry.light),
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const pressureData = {
+                labels: data.map(entry => entry.date),
+                datasets: [{
+                    label: 'Pressure (hPa)',
+                    data: data.map(entry => entry.pressure),
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            // Создание графиков
+            new Chart(document.getElementById('temperatureChart').getContext('2d'), {
+                type: 'line',
+                data: temperatureData
+            });
+
+            new Chart(document.getElementById('humidityChart').getContext('2d'), {
+                type: 'line',
+                data: humidityData
+            });
+
+            new Chart(document.getElementById('lightChart').getContext('2d'), {
+                type: 'line',
+                data: lightData
+            });
+
+            new Chart(document.getElementById('pressureChart').getContext('2d'), {
+                type: 'line',
+                data: pressureData
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    // Запуск функции создания графиков после загрузки страницы
+    window.onload = createCharts;
+</script>
+</body>
+</html>
